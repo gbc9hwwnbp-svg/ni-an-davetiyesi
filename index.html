@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Zozan & Çakır - Nişan Davetiyesi</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Great+Vibes&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-cream: #FDFBF7;
+      --card-bg: #FCF9F2;
+      --gold-primary: #C5A059;
+      --gold-light: #E6CA85;
+      --gold-dark: #9A7730;
+      --text-brown: #4A3E3D;
+      --text-light: #7A6B6B;
+      --shadow-soft: 0 10px 30px rgba(197, 160, 89, 0.15);
+      --shadow-deep: 0 20px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Cormorant Garamond', serif;
+      background-color: #1a1816;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Müzik Çalar Butonu */
+    .music-control {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      z-index: 1000;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(253, 251, 247, 0.9);
+      border: 1px solid var(--gold-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-dark);
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transition: all 0.3s ease;
+    }
+
+    .music-control i {
+      font-size: 18px;
+    }
+
+    .music-control.playing i {
+      animation: spin 4s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Ana Konteyner */
+    .app-viewport {
+      position: relative;
+      width: 100%;
+      max-width: 450px;
+      height: 100%;
+      max-height: 850px;
+      background: var(--bg-cream);
+      box-shadow: var(--shadow-deep);
+      overflow: hidden;
+      perspective: 1200px;
+    }
+
+    /* AKORDİYON KAPAK (GATEFOLD) */
+    .gatefold-cover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 500;
+      display: flex;
+      pointer-events: auto;
+      transition: visibility 1.5s;
+    }
+
+    .gatefold-cover.opened {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .door {
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(135deg, #FAF6EE 0%, #EFE8D8 100%);
+      position: relative;
+      display: flex;
+      align-items: center;
+      transition: transform 1.4s cubic-bezier(0.77, 0, 0.175, 1);
+      box-shadow: inset 0 0 50px rgba(197, 160, 89, 0.2);
+    }
+
+    .door-left {
+      border-right: 1px solid rgba(197, 160, 89, 0.4);
+      justify-content: flex-end;
+      padding-right: 15px;
+      transform-origin: left center;
+    }
+
+    .door-right {
+      border-left: 1px solid rgba(197, 160, 89, 0.4);
+      justify-content: flex-start;
+      padding-left: 15px;
+      transform-origin: right center;
+    }
+
+    .gatefold-cover.opened .door-left {
+      transform: rotateY(-105deg);
+    }
+
+    .gatefold-cover.opened .door-right {
+      transform: rotateY(105deg);
+    }
+
+    .monogram-letter {
+      font-family: 'Great Vibes', cursive;
+      font-size: 85px;
+      color: var(--gold-primary);
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.08);
+      line-height: 1;
+    }
+
+    .seal-button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #D4AF37 0%, #AA7C11 100%);
+      border: 3px solid #FFF8E7;
+      box-shadow: 0 8px 25px rgba(170, 124, 17, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #FFF;
+      cursor: pointer;
+      z-index: 510;
+      transition: transform 0.3s ease, opacity 0.8s ease;
+    }
+
+    .seal-button:hover {
+      transform: translate(-50%, -50%) scale(1.08);
+    }
+
+    .gatefold-cover.opened .seal-button {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.5);
+    }
+
+    .seal-button i {
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+
+    .seal-button span {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* SAYFA SİSTEMİ & GEÇİŞLER */
+    .pages-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .page {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.92) translateZ(-50px);
+      transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1), 
+                  opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), 
+                  visibility 1.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateZ(0);
+      z-index: 10;
+    }
+
+    /* Golden Sparkle Glow Overlay */
+    .sparkle-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+      background: radial-gradient(circle, rgba(230,202,133,0.3) 0%, rgba(255,255,255,0) 70%);
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    .sparkle-overlay.flash {
+      opacity: 1;
+    }
+
+    /* DAVETİYE ÇERÇEVESİ */
+    .card-frame {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid rgba(197, 160, 89, 0.3);
+      padding: 55px 25px 30px 25px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: inset 0 0 25px rgba(197, 160, 89, 0.08);
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .card-frame::before {
+      content: '';
+      position: absolute;
+      top: 7px;
+      left: 7px;
+      right: 7px;
+      bottom: 7px;
+      border: 1px solid rgba(197, 160, 89, 0.25);
+      border-radius: 8px;
+      pointer-events: none;
+    }
+
+    /* DOKUNMA ALANLARI */
+    .touch-zone {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 25%;
+      z-index: 200;
+    }
+    .touch-left { left: 0; }
+    .touch-right { right: 0; }
+
+    /* ÜST BİLGİ & SAYFA İNDİKATÖRÜ */
+    .top-indicator {
+      position: absolute;
+      top: 18px;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 20;
+    }
+
+    .page-dots {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(197, 160, 89, 0.3);
+      transition: all 0.4s;
+    }
+
+    .dot.active {
+      background: var(--gold-primary);
+      width: 16px;
+      border-radius: 10px;
+    }
+
+    .swipe-hint {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      color: var(--gold-dark);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+
+    /* DEKORATİF ÇİÇEK & YÜZÜK SVGLERİ */
+    .floral-top {
+      width: 130px;
+      height: auto;
+      margin-bottom: 5px;
+    }
+
+    .ring-icon {
+      width: 42px;
+      height: auto;
+      margin: 10px 0;
+    }
+
+    /* YAZI STİLLERİ */
+    .sub-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      margin-bottom: 8px;
+    }
+
+    .couples-name {
+      font-family: 'Great Vibes', cursive;
+      font-size: 42px;
+      color: var(--gold-primary);
+      line-height: 1.2;
+      margin: 5px 0;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .ampersand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      font-style: italic;
+      color: var(--text-light);
+      display: block;
+      margin: -5px 0;
+    }
+
+    .main-text {
+      font-size: 17px;
+      line-height: 1.6;
+      color: var(--text-brown);
+      font-weight: 500;
+      margin: 10px 0;
+    }
+
+    .highlight-box {
+      border-top: 1px solid rgba(197, 160, 89, 0.3);
+      border-bottom: 1px solid rgba(197, 160, 89, 0.3);
+      padding: 10px 15px;
+      margin: 10px 0;
+      width: 100%;
+    }
+
+    .date-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gold-dark);
+      letter-spacing: 1px;
+    }
+
+    /* GERİ SAYIM SAYACI */
+    .countdown-container {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      margin: 15px 0;
+    }
+
+    .time-box {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(197, 160, 89, 0.4);
+      border-radius: 8px;
+      padding: 10px 2px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    }
+
+    .time-val {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--gold-dark);
+      display: block;
+    }
+
+    .time-lbl {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-light);
+      margin-top: 3px;
+      display: block;
+    }
+
+    /* BUTONLAR */
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #C5A059 0%, #9A7730 100%);
+      color: #FFF;
+      text-decoration: none;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      padding: 12px 24px;
+      border-radius: 25px;
+      box-shadow: 0 4px 15px rgba(197, 160, 89, 0.3);
+      transition: all 0.3s ease;
+      margin-top: 8px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .action-btn:active {
+      transform: scale(0.96);
+    }
+
+    .footer-note {
+      font-size: 14px;
+      font-style: italic;
+      color: var(--text-light);
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Müzik Çalar Control -->
+  <div class="music-control" id="musicBtn" onclick="toggleMusic()">
+    <i class="fa-solid fa-music"></i>
+  </div>
+  
+  <!-- Arka Plan Ses Dosyası (GitHub root dizinindeki muzik.mp3) -->
+  <audio id="bgMusic" loop src="muzik.mp3" preload="auto"></audio>
+
+  <div class="app-viewport">
+    
+    <!-- Sparkle Animation Overlay -->
+    <div class="sparkle-overlay" id="sparkleOverlay"></div>
+
+    <!-- 1. KISIM: AKORDİYON KAPAK (GATEFOLD) -->
+    <div class="gatefold-cover" id="gatefoldCover">
+      <div class="door door-left">
+        <div class="monogram-letter">Z</div>
+      </div>
+      <div class="door door-right">
+        <div class="monogram-letter">Ç</div>
+      </div>
+      <div class="seal-button" onclick="openDavetiye()">
+        <i class="fa-solid fa-heart"></i>
+        <span>AÇINIZ</span>
+      </div>
+    </div>
+
+    <!-- Dokunma Geçiş Alanları -->
+    <div class="touch-zone touch-left" onclick="prevPage()"></div>
+    <div class="touch-zone touch-right" onclick="nextPage()"></div>
+
+    <!-- 2. KISIM: İÇERİK SAYFALARI (5 SAYFA) -->
+    <div class="pages-container">
+      
+      <!-- SAYFA 1: Giriş ve Davet -->
+      <div class="page active" id="page1">
+        <div class="card-frame">
+          <div class="top-indicator">
+            <div class="page-dots">
+              <span class="dot active"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+            <span class="swipe-hint">Sayfa 1 / 5 • Yana Kaydırın</span>
+          </div>
+
+          <!-- Çiçek Süslemesi -->
+          <svg class="floral-top" viewBox="0 0 100 40" fill="none">
+            <path d="M10 20 C 30 5, 40 35, 50 20 C 60 5, 70 35, 90 20" stroke="#C5A059" stroke-width="1.2" fill="none"/>
+            <circle cx="50" cy="20" r="3" fill="#C5A059"/>
+            <circle cx="30" cy="15" r="2" fill="#E6CA85"/>
+            <circle cx="70" cy="15" r="2" fill="#E6CA85"/>
+          </svg>
+
+          <div>
+            <div class="sub-title">Nişan Davetiyesi</div>
+            <div class="couples-name">Zozan Yıldırım</div>
+            <span class="ampersand">&</span>
+            <div class="couples-name">Çakır Özdemir</div>
+          </div>
+
+          <!-- Yüzük İkonu -->
+          <svg class="ring-icon" viewBox="0 0 64 64" fill="none">
+            <circle cx="26" cy="36" r="16" stroke="#C5A059" stroke-width="3"/>
+            <circle cx="38" cy="36" r="16" stroke="#E6CA85" stroke-width="3"/>
+            <path d="M26 16 L28 10 L32 10 L34 16 Z" fill="#C5A059"/>
+            <polygon points="30,6 33,10 27,10" fill="#E6CA85"/>
+          </svg>
+
+          <p class="main-text">
+            Bu mutlu günümüzde sizleri de aramızda görmekten sevinç duyacağız.
+          </p>
+
+          <div class="footer-note">Sevgiyle Davetlisiniz.</div>
+        </div>
+      </div>
+
+      <!-- SAYFA 2: Etkinlik Detayı -->
+      <div class="page" id="page2">
+        <div class="card-frame">
+          <div class="top-indicator">
+            <div class="page-dots">
+              <span class="dot"></span>
+              <span class="dot active"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+            <span class="swipe-hint">Sayfa 2 / 5 • Yana Kaydırın</span>
+          </div>
+
+          <svg class="floral-top" viewBox="0 0 100 40" fill="none">
+            <path d="M10 20 C 30 5, 40 35, 50 20 C 60 5, 70 35, 90 20" stroke="#C5A059" stroke-width="1.2" fill="none"/>
+            <circle cx="50" cy="20" r="3" fill="#C5A059"/>
+          </svg>
+
+          <div class="sub-title">Birlikteliğe İlk Adım</div>
+
+          <p class="main-text" style="margin: 20px 0;">
+            Hayatımızın bu en özel ve anlamlı gününde, mutluluğumuzu paylaşmak dileğiyle...
+          </p>
+
+          <div class="highlight-box">
+            <div class="sub-title" style="margin-bottom:3px;">SÖZ & NİŞAN TÖRENİ</div>
+            <p style="color: var(--text-brown); font-size: 15px;">Unutulmaz Anlara Birlikte Şahitlik Etmeye Davetlisiniz.</p>
+          </div>
+
+          <div class="footer-note">Zozan & Çakır</div>
+        </div>
+      </div>
+
+      <!-- SAYFA 3: Geri Sayım Sayacı -->
+      <div class="page" id="page3">
+        <div class="card-frame">
+          <div class="top-indicator">
+            <div class="page-dots">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot active"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+            <span class="swipe-hint">Sayfa 3 / 5 • Yana Kaydırın</span>
+          </div>
+
+          <div class="sub-title">Büyük Günü Beklerken</div>
+          
+          <div class="countdown-container">
+            <div class="time-box">
+              <span class="time-val" id="days">00</span>
+              <span class="time-lbl">Gün</span>
+            </div>
+            <div class="time-box">
+              <span class="time-val" id="hours">00</span>
+              <span class="time-lbl">Saat</span>
+            </div>
+            <div class="time-box">
+              <span class="time-val" id="minutes">00</span>
+              <span class="time-lbl">Dakika</span>
+            </div>
+            <div class="time-box">
+              <span class="time-val" id="seconds">00</span>
+              <span class="time-lbl">Saniye</span>
+            </div>
+          </div>
+
+          <!-- Açık Tarih ve Saat Bilgisi Kutusu -->
+          <div class="highlight-box">
+            <div class="date-text">09.10.2026 Cuma</div>
+            <div class="sub-title" style="margin-top:5px; margin-bottom:0; color: var(--text-brown);">Saat: 19:00</div>
+          </div>
+
+          <p class="footer-note">Törene Kalan Süre</p>
+        </div>
+      </div>
+
+      <!-- SAYFA 4: Mekân ve Yol Tarifi -->
+      <div class="page" id="page4">
+        <div class="card-frame">
+          <div class="top-indicator">
+            <div class="page-dots">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot active"></span>
+              <span class="dot"></span>
+            </div>
+            <span class="swipe-hint">Sayfa 4 / 5 • Yana Kaydırın</span>
+          </div>
+
+          <div class="sub-title">Tören Mekânı</div>
+          
+          <div style="margin: 15px 0;">
+            <h3 style="font-family:'Cormorant Garamond'; font-size:24px; color:var(--gold-dark); margin-bottom:8px;">Seyhan Gücü Sosyal Tesisleri</h3>
+            <p style="font-family:'Montserrat'; font-size:13px; color:var(--text-brown); line-height:1.5;">
+              Seyhan, 12. Sokak 273 A<br>
+              01390 Yüreğir / Adana
+            </p>
+          </div>
+
+          <a href="https://maps.google.com/?q=Seyhan+Gucu+Sosyal+Tesisleri+Adana" target="_blank" class="action-btn">
+            <i class="fa-solid fa-location-dot"></i> Yol Tarifi / Google Maps
+          </a>
+
+          <div class="footer-note">Sizleri Aramızda Görmekten Mutluluk Duyarız.</div>
+        </div>
+      </div>
+
+      <!-- SAYFA 5: Teşekkür & Kapanış -->
+      <div class="page" id="page5">
+        <div class="card-frame">
+          <div class="top-indicator">
+            <div class="page-dots">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot active"></span>
+            </div>
+            <span class="swipe-hint">Sayfa 5 / 5</span>
+          </div>
+
+          <svg class="floral-top" viewBox="0 0 100 40" fill="none">
+            <path d="M10 20 C 30 5, 40 35, 50 20 C 60 5, 70 35, 90 20" stroke="#C5A059" stroke-width="1.2" fill="none"/>
+            <circle cx="50" cy="20" r="3" fill="#C5A059"/>
+          </svg>
+
+          <div class="sub-title">Teşekkür Ederiz</div>
+
+          <div class="couples-name" style="font-size: 36px; margin: 15px 0;">Zozan & Çakır</div>
+
+          <p class="main-text" style="font-style: italic; color: var(--text-light);">
+            Bu özel başlangıcımızda yanımızda olduğunuz için teşekkür ederiz.
+          </p>
+
+          <div class="footer-note">09.10.2026</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    let currentPage = 1;
+    const totalPages = 5;
+    let isTransitioning = false;
+    let musicPlaying = false;
+
+    // KAPAK AÇMA
+    function openDavetiye() {
+      const cover = document.getElementById('gatefoldCover');
+      cover.classList.add('opened');
+      
+      // Müziği otomatik başlatmayı dene
+      const audio = document.getElementById('bgMusic');
+      audio.play().then(() => {
+        musicPlaying = true;
+        document.getElementById('musicBtn').classList.add('playing');
+      }).catch(() => {
+        // Otomatik oynatma engellendiyse buton ile açılabilir
+      });
+    }
+
+    // MÜZİK AÇ / KAPAT
+    function toggleMusic() {
+      const audio = document.getElementById('bgMusic');
+      const btn = document.getElementById('musicBtn');
+      
+      if (musicPlaying) {
+        audio.pause();
+        btn.classList.remove('playing');
+        musicPlaying = false;
+      } else {
+        audio.play();
+        btn.classList.add('playing');
+        musicPlaying = true;
+      }
+    }
+
+    // SAYFA GEÇİŞİ (3D & SPARKLE EFFECT)
+    function goToPage(targetPage) {
+      if (isTransitioning || targetPage === currentPage || targetPage < 1 || targetPage > totalPages) return;
+      
+      isTransitioning = true;
+      const currentEl = document.getElementById(`page${currentPage}`);
+      const targetEl = document.getElementById(`page${targetPage}`);
+      const sparkle = document.getElementById('sparkleOverlay');
+
+      // Sparkle Efektini Tetikle
+      sparkle.classList.add('flash');
+
+      currentEl.classList.remove('active');
+      
+      setTimeout(() => {
+        targetEl.classList.add('active');
+        currentPage = targetPage;
+        
+        setTimeout(() => {
+          sparkle.classList.remove('flash');
+          isTransitioning = false;
+        }, 400);
+      }, 500);
+    }
+
+    function nextPage() {
+      if (currentPage < totalPages) {
+        goToPage(currentPage + 1);
+      }
+    }
+
+    function prevPage() {
+      if (currentPage > 1) {
+        goToPage(currentPage - 1);
+      }
+    }
+
+    // MOBIL TOUCH / SWIPE SENSÖRÜ
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, false);
+
+    document.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, false);
+
+    function handleSwipe() {
+      const swipeThreshold = 40;
+      if (touchEndX < touchStartX - swipeThreshold) {
+        nextPage();
+      }
+      if (touchEndX > touchStartX + swipeThreshold) {
+        prevPage();
+      }
+    }
+
+    // KLAVYEDEN SAYFA DEĞİŞTİRME
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextPage();
+      if (e.key === 'ArrowLeft') prevPage();
+    });
+
+    // GERİ SAYIM HESAPLAMA (09.10.2026 19:00)
+    const targetDate = new Date('October 9, 2026 19:00:00').getTime();
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const difference = targetDate - now;
+
+      if (difference > 0) {
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        document.getElementById('days').innerText = days < 10 ? '0' + days : days;
+        document.getElementById('hours').innerText = hours < 10 ? '0' + hours : hours;
+        document.getElementById('minutes').innerText = minutes < 10 ? '0' + minutes : minutes;
+        document.getElementById('seconds').innerText = seconds < 10 ? '0' + seconds : seconds;
+      }
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+  </script>
+</body>
+</html>
